@@ -1,0 +1,27 @@
+services:
+  osm-ioc-hub:
+    build: ./docker
+    container_name: osm-ioc-hub
+    ports:
+      - "8000:8000"
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./:/app
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.8
+    container_name: osm-caddy
+    ports:
+      - "8080:8080"
+    environment:
+      BASIC_AUTH_USER: ${BASIC_AUTH_USER}
+      BASIC_AUTH_HASH: ${BASIC_AUTH_HASH}
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - osm-ioc-hub
+    restart: unless-stopped
