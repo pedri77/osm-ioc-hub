@@ -1,0 +1,27 @@
+{
+    auto_https off
+}
+
+:8080 {
+    encode zstd gzip
+
+    route /api* {
+        uri strip_prefix /api
+        basicauth {
+            {env.BASIC_AUTH_USER} {env.BASIC_AUTH_HASH}
+        }
+        reverse_proxy osm-ioc-hub:8000
+    }
+
+    route /ui* {
+        uri strip_prefix /ui
+        basicauth {
+            {env.BASIC_AUTH_USER} {env.BASIC_AUTH_HASH}
+        }
+        reverse_proxy osm-ioc-hub:8501
+    }
+
+    handle {
+        respond "OK. Use /api (FastAPI) o /ui (Streamlit)." 200
+    }
+}
